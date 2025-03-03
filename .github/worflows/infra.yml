@@ -1,0 +1,42 @@
+name: Deploy Infra AWS
+
+on:
+  workflow_dispatch:
+    inputs:
+      AWS_ACCESS_KEY_ID:
+        description: "AWS Access Key ID"
+        required: true
+        type: string
+      AWS_SECRET_ACCESS_KEY:
+        description: "AWS Secret Access Key"
+        required: true
+        type: string
+      AWS_REGION:
+        description: "AWS Region"
+        required: false
+        default: "us-east-1"
+        type: string
+
+jobs:
+  infra:
+    name: Criar Infra com Terraform
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código-fonte
+        uses: actions/checkout@v4
+
+      - name: Instalar Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+
+      - name: Inicializar Terraform
+        run: terraform init
+
+      - name: Aplicar Terraform
+        run: terraform apply -auto-approve
+        env:
+          TF_VAR_aws_region: ${{ inputs.AWS_REGION }}
+          TF_VAR_aws_access_key_id: ${{ inputs.AWS_ACCESS_KEY_ID }}
+          TF_VAR_aws_secret_access_key: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
