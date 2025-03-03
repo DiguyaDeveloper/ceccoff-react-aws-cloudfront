@@ -32,10 +32,14 @@ jobs:
           terraform_version: 1.6.0
 
       - name: Inicializar Terraform
-        run: terraform init
+        run: |
+          cd infra
+          terraform init
 
       - name: Aplicar Terraform
-        run: terraform apply -auto-approve
+        run: |
+          cd infra
+          terraform apply -auto-approve
         env:
           TF_VAR_aws_region: ${{ inputs.AWS_REGION }}
           TF_VAR_aws_access_key_id: ${{ inputs.AWS_ACCESS_KEY_ID }}
