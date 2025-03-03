@@ -18,7 +18,7 @@ variable "aws_access_key_id" {}
 variable "aws_secret_access_key" {}
 
 resource "aws_s3_bucket" "react_bucket" {
-  bucket = "meu-react-app-bucket"
+  bucket = "ceccoff-react-aws-cloudfront-bucket"
 
   tags = {
     Name = "React App Bucket"
