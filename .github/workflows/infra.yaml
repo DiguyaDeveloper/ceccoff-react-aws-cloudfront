@@ -23,24 +23,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout código-fonte
+      - name: 📥 Checkout código-fonte
         uses: actions/checkout@v4
 
-      - name: Instalar Terraform
+      - name: 🔧 Configurar AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_IAM_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: 🏗️ Instalar Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.6.0
 
-      - name: Inicializar Terraform
+      - name: 🛠️ Inicializar Terraform
         run: |
           cd infra
           terraform init
 
-      - name: Aplicar Terraform
+      - name: ✅ Validar Terraform
+        run: terraform validate
+
+      - name: 📊 Criar Plano Terraform
+        run: terraform plan -out=tfplan
+
+      - name: 🚀 Aplicar Terraform
+        run: terraform apply -auto-approve tfplan
+
+      - name: 🌎 Exibir URLs da Infra Criada
         run: |
-          cd infra
-          terraform apply -auto-approve
-        env:
-          TF_VAR_aws_region: ${{ inputs.AWS_REGION }}
-          TF_VAR_aws_access_key_id: ${{ inputs.AWS_ACCESS_KEY_ID }}
-          TF_VAR_aws_secret_access_key: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
+          echo "S3 Bucket: $(terraform output s3_bucket_name)"
+          echo "CloudFront URL: $(terraform output cloudfront_url)"
+
+
