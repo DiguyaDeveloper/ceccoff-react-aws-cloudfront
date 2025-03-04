@@ -38,22 +38,25 @@ jobs:
           terraform_version: 1.6.0
 
       - name: 🛠️ Inicializar Terraform
-        run: |
-          cd infra
-          terraform init
+        run: terraform init
+        working-directory: infra
 
       - name: ✅ Validar Terraform
         run: terraform validate
+        working-directory: infra
 
       - name: 📊 Criar Plano Terraform
         run: terraform plan -out=tfplan
+        working-directory: infra
 
       - name: 🚀 Aplicar Terraform
         run: terraform apply -auto-approve tfplan
+        working-directory: infra
 
       - name: 🌎 Exibir URLs da Infra Criada
         run: |
           echo "S3 Bucket: $(terraform output s3_bucket_name)"
           echo "CloudFront URL: $(terraform output cloudfront_url)"
+        working-directory: infra
 
 
