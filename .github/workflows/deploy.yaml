@@ -3,22 +3,10 @@ name: Deploy React App
 on:
   workflow_dispatch:
     inputs:
-      AWS_ACCESS_KEY_ID:
-        description: "AWS Access Key ID"
-        required: true
-        type: string
-      AWS_SECRET_ACCESS_KEY:
-        description: "AWS Secret Access Key"
-        required: true
-        type: string
       AWS_REGION:
         description: "AWS Region"
         required: false
         default: "us-east-1"
-        type: string
-      CLOUDFRONT_DISTRIBUTION_ID:
-        description: "CloudFront Distribution ID"
-        required: true
         type: string
       S3_BUCKET:
         description: "S3 Bucket Name"
@@ -43,13 +31,6 @@ jobs:
       - name: Checkout código-fonte
         uses: actions/checkout@v4
 
-      - name: Configurar credenciais da AWS
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ inputs.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ inputs.AWS_REGION }}
-
       - name: Instalar Node.js
         uses: actions/setup-node@v4
         with:
@@ -60,32 +41,21 @@ jobs:
 
       - name: Criar build do React baseado no ambiente
         run: |
-          set -e
-          NODE_ENV=${{ inputs.ENVIRONMENT }} npm run build
+          REACT_APP_ENV=${{ inputs.ENVIRONMENT }} npm run build:${{ inputs.ENVIRONMENT }}
 
-      - name: Garantir que o CloudFront pode acessar o S3 privado
+      - name: Configurar credenciais da AWS
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy para S3
+        run: aws s3 sync build/ s3://${{ inputs.S3_BUCKET }} --delete
+
+      - name: Invalidação do CloudFront (opcional)
+        if: secrets.CLOUDFRONT_DISTRIBUTION_ID != ''
         run: |
-          aws s3api put-bucket-policy --bucket ${{ inputs.S3_BUCKET }} --policy '{
-            "Version": "2012-10-17",
-            "Statement": [
-              {
-                "Effect": "Allow",
-                "Principal": {
-                  "Service": "cloudfront.amazonaws.com"
-                },
-                "Action": "s3:GetObject",
-                "Resource": "arn:aws:s3:::${{ inputs.S3_BUCKET }}/*",
-                "Condition": {
-                  "StringEquals": {
-                    "AWS:SourceArn": "arn:aws:cloudfront::${{ secrets.AWS_ACCOUNT_ID }}:distribution/${{ inputs.CLOUDFRONT_DISTRIBUTION_ID }}"
-                  }
-                }
-              }
-            ]
-          }'
-
-      - name: Upload para o S3 (Bucket Privado)
-        run: aws s3 sync build/ s3://${{ inputs.S3_BUCKET }} --delete --exact-timestamps
-
-      - name: Invalidar cache do CloudFront
-        run: aws cloudfront create-invalidation --distribution-id ${{ inputs.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"
