@@ -1,11 +1,13 @@
 variable "aws_region" {
+  type        = string
   description = "Região da AWS"
   default     = "us-east-1"
 }
 
 variable "s3_bucket_name" {
-  description = "Nome do bucket S3 para hospedar o frontend"
   type        = string
+  description = "Nome do bucket S3 para hospedar o frontend"
+  default    = "ceccoff-react-aws-cloudfront"
 }
 
 variable "cloudfront_price_class" {
@@ -16,11 +18,26 @@ variable "cloudfront_price_class" {
 variable "domain_name" {
   description = "Nome do domínio (opcional)"
   type        = string
-  default     = ""
+  default     = "ceccoff-react-aws-cloudfront.s3-website-us-east-1.amazonaws.com"
 }
 
 variable "acm_certificate_arn" {
   description = "ARN do certificado ACM para HTTPS (se for usar domínio próprio)"
   type        = string
   default     = ""
+}
+
+variable "AWS_ACCESS_KEY_ID" {
+  type = string
+  description = "aws_access_key_id"
+}
+
+variable "AWS_SECRET_ACCESS_KEY" {
+  type = string
+  description = "aws_secret_access_key"
+}
+
+variable "AWS_SESSION_TOKEN" {
+  type = string
+  description = "aws_session_token"
 }
