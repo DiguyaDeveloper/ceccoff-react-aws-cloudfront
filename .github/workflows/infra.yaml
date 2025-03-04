@@ -32,10 +32,6 @@ jobs:
         run: terraform validate
         working-directory: infra
 
-      - name: 📊 Criar Plano Terraform
-        run: terraform plan -out=tfplan
-        working-directory: infra
-
       - name: 🚀 Aplicar Terraform
         run: terraform apply -auto-approve tfplan
         working-directory: infra
