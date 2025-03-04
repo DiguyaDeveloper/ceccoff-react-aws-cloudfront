@@ -33,7 +33,7 @@ jobs:
         working-directory: infra
 
       - name: 🚀 Aplicar Terraform
-        run: terraform apply -auto-approve tfplan
+        run: terraform apply -auto-approve
         working-directory: infra
 
       - name: 🌎 Exibir URLs da Infra Criada
