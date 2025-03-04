@@ -2,20 +2,6 @@ name: Deploy Infra AWS
 
 on:
   workflow_dispatch:
-    inputs:
-      AWS_ACCESS_KEY_ID:
-        description: "AWS Access Key ID"
-        required: true
-        type: string
-      AWS_SECRET_ACCESS_KEY:
-        description: "AWS Secret Access Key"
-        required: true
-        type: string
-      AWS_REGION:
-        description: "AWS Region"
-        required: false
-        default: "us-east-1"
-        type: string
 
 jobs:
   infra:
